@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="PMGSY Project Classifier - AI-Powered Infrastructure Classification">
+  <title>PMGSY Project Classifier | AI-Powered Classification</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.webmanifest">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="header-content">
+        <div class="header-title-section">
+          <h1 class="main-title">
+            <span class="icon">🏗️</span>
+            PMGSY Project Classifier
+          </h1>
+          <p class="tagline">Intelligent Classification of Rural Infrastructure Projects</p>
+        </div>
+        <div class="status-badge">
+          <span class="status-indicator" id="statusIndicator"></span>
+          <span class="status-text" id="statusText">Ready</span>
+        </div>
+      </div>
+      <div class="header-info">
+        <p class="info-text">Powered by <strong>IBM Watson ML</strong> • XGBoost Classifier • Pradhan Mantri Gram Sadak Yojana</p>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <section class="form-section">
+        <div class="card form-card">
+          <div class="card-header">
+            <h2 class="card-title">
+              <span class="icon">📋</span>
+              Project Input Parameters
+            </h2>
+            <p class="card-subtitle">Enter the project details for automatic classification</p>
+          </div>
+
+          <form id="predictionForm" class="prediction-form">
+            <fieldset class="form-section-group">
+              <legend class="section-legend">Location Information</legend>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="stateName" class="form-label">State Name <span class="required">*</span></label>
+                  <input type="text" id="stateName" name="stateName" class="form-input" placeholder="e.g., Maharashtra" required aria-label="State Name">
+                </div>
+                <div class="form-group">
+                  <label for="districtName" class="form-label">District Name <span class="required">*</span></label>
+                  <input type="text" id="districtName" name="districtName" class="form-input" placeholder="e.g., Pune" required aria-label="District Name">
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset class="form-section-group">
+              <legend class="section-legend">Sanctioned Works</legend>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="noOfRoadWorkSanctioned" class="form-label">Number of Road Works <span class="required">*</span></label>
+                  <input type="number" id="noOfRoadWorkSanctioned" name="noOfRoadWorkSanctioned" class="form-input" placeholder="0" min="0" required aria-label="Number of Road Works Sanctioned">
+                </div>
+                <div class="form-group">
+                  <label for="lengthOfRoadWorkSanctioned" class="form-label">Length of Road Work (km) <span class="required">*</span></label>
+                  <input type="number" id="lengthOfRoadWorkSanctioned" name="lengthOfRoadWorkSanctioned" class="form-input" placeholder="0.00" min="0" step="0.01" required aria-label="Length of Road Work Sanctioned">
+                </div>
+                <div class="form-group">
+                  <label for="noOfBridgesSanctioned" class="form-label">Number of Bridges <span class="required">*</span></label>
+                  <input type="number" id="noOfBridgesSanctioned" name="noOfBridgesSanctioned" class="form-input" placeholder="0" min="0" required aria-label="Number of Bridges Sanctioned">
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group full-width">
+                  <label for="costOfWorksSanctioned" class="form-label">Cost of Works Sanctioned (₹) <span class="required">*</span></label>
+                  <input type="number" id="costOfWorksSanctioned" name="costOfWorksSanctioned" class="form-input" placeholder="0.00" min="0" step="0.01" required aria-label="Cost of Works Sanctioned">
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset class="form-section-group">
+              <legend class="section-legend">Completed Works</legend>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="noOfRoadWorksCompleted" class="form-label">Number of Road Works <span class="required">*</span></label>
+                  <input type="number" id="noOfRoadWorksCompleted" name="noOfRoadWorksCompleted" class="form-input" placeholder="0" min="0" required aria-label="Number of Road Works Completed">
+                </div>
+                <div class="form-group">
+                  <label for="lengthOfRoadWorkCompleted" class="form-label">Length of Road Work (km) <span class="required">*</span></label>
+                  <input type="number" id="lengthOfRoadWorkCompleted" name="lengthOfRoadWorkCompleted" class="form-input" placeholder="0.00" min="0" step="0.01" required aria-label="Length of Road Work Completed">
+                </div>
+                <div class="form-group">
+                  <label for="noOfBridgesCompleted" class="form-label">Number of Bridges <span class="required">*</span></label>
+                  <input type="number" id="noOfBridgesCompleted" name="noOfBridgesCompleted" class="form-input" placeholder="0" min="0" required aria-label="Number of Bridges Completed">
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group full-width">
+                  <label for="expenditureOccurred" class="form-label">Expenditure Occurred (₹) <span class="required">*</span></label>
+                  <input type="number" id="expenditureOccurred" name="expenditureOccurred" class="form-input" placeholder="0.00" min="0" step="0.01" required aria-label="Expenditure Occurred">
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset class="form-section-group">
+              <legend class="section-legend">Balance Works</legend>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="noOfRoadWorksBalance" class="form-label">Number of Road Works <span class="required">*</span></label>
+                  <input type="number" id="noOfRoadWorksBalance" name="noOfRoadWorksBalance" class="form-input" placeholder="0" min="0" required aria-label="Number of Road Works Balance">
+                </div>
+                <div class="form-group">
+                  <label for="lengthOfRoadWorkBalance" class="form-label">Length of Road Work (km) <span class="required">*</span></label>
+                  <input type="number" id="lengthOfRoadWorkBalance" name="lengthOfRoadWorkBalance" class="form-input" placeholder="0.00" min="0" step="0.01" required aria-label="Length of Road Work Balance">
+                </div>
+                <div class="form-group">
+                  <label for="noOfBridgesBalance" class="form-label">Number of Bridges <span class="required">*</span></label>
+                  <input type="number" id="noOfBridgesBalance" name="noOfBridgesBalance" class="form-input" placeholder="0" min="0" required aria-label="Number of Bridges Balance">
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset class="form-section-group">
+              <legend class="section-legend">Additional Information</legend>
+              <div class="form-row">
+                <div class="form-group full-width">
+                  <label for="column15" class="form-label">Column 15 (Additional Parameter) <span class="required">*</span></label>
+                  <input type="text" id="column15" name="column15" class="form-input" placeholder="Additional classification parameter" required aria-label="Column 15">
+                </div>
+              </div>
+            </fieldset>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary" id="submitBtn" aria-label="Submit prediction">
+                <span class="btn-icon">🚀</span>
+                <span class="btn-text">Classify Project</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section class="results-section" id="resultsSection" style="display: none;">
+        <div class="card results-card">
+          <div class="card-header results-header">
+            <h2 class="card-title"><span class="icon">✨</span>Classification Result</h2>
+            <button class="btn-close" id="closeResultsBtn" aria-label="Close results">✕</button>
+          </div>
+
+          <div id="loadingState" class="result-state loading-state" style="display: none;">
+            <div class="spinner"></div>
+            <h3 class="loading-title">Processing Your Request</h3>
+            <p class="loading-description">Analyzing project parameters with AI model...</p>
+            <div class="progress-steps">
+              <div class="step active">Authenticating with IBM Watson ML</div>
+              <div class="step">Sending data to classifier</div>
+              <div class="step">Receiving predictions</div>
+            </div>
+          </div>
+
+          <div id="successState" class="result-state success-state" style="display: none;">
+            <div class="result-content">
+              <div class="result-icon success-icon">✓</div>
+              <h3 class="result-title">Classification Complete</h3>
+
+              <div class="prediction-box">
+                <h4 class="prediction-title">Prediction</h4>
+                <div class="prediction-label">Predicted Scheme: <strong><span id="predictedLabelValue">—</span></strong></div>
+                <div class="prediction-raw">
+                  <h5 class="prediction-title" style="margin-top:12px;">Raw Model Output:</h5>
+                  <pre class="prediction-output" id="predictionOutput"></pre>
+                </div>
+              </div>
+
+              <div class="result-metadata">
+                <div class="metadata-row">
+                  <span class="metadata-label">Status:</span>
+                  <span class="metadata-value" id="statusValue">Success</span>
+                </div>
+                <div class="metadata-row">
+                  <span class="metadata-label">Timestamp:</span>
+                  <span class="metadata-value" id="timestampValue">—</span>
+                </div>
+                <div class="metadata-row">
+                  <span class="metadata-label">Processing Time:</span>
+                  <span class="metadata-value" id="processingTimeValue">—</span>
+                </div>
+              </div>
+
+              <div class="result-actions">
+                <button class="btn btn-secondary" id="newClassificationBtn"><span>📋</span><span>New Classification</span></button>
+              </div>
+            </div>
+          </div>
+
+          <div id="errorState" class="result-state error-state" style="display: none;">
+            <div class="error-content">
+              <div class="result-icon error-icon">✗</div>
+              <h3 class="error-title">Classification Failed</h3>
+              <p class="error-message" id="errorMessage"></p>
+              <div class="result-actions">
+                <button class="btn btn-danger" id="retryBtn"><span>🔄</span><span>Try Again</span></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-content">
+        <p class="footer-main">🚀 PMGSY Project Classifier | Intelligent Classification of Rural Infrastructure Projects</p>
+        <p class="footer-secondary">Built with Node.js, Express.js, IBM Watson ML, and XGBoost</p>
+        <p class="footer-tech">
+          <span class="tech-badge">IBM Watson AI</span>
+          <span class="tech-badge">XGBoost</span>
+          <span class="tech-badge">Express.js</span>
+          <span class="tech-badge">HTML5</span>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
+
