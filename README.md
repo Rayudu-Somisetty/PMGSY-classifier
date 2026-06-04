@@ -6,6 +6,9 @@ An intelligent, full-stack web application that automatically classifies Pradhan
 
 **Built with:** Node.js • Express.js • IBM Watson ML • XGBoost Classifier
 
+**Problem statement and Dataset folder**:- https://drive.google.com/drive/folders/1VLwllhf2qoa1pppZRJucxvlWASpsp-eI?usp=sharing
+
+**deployment link**:- https://pmgsy-classifier.onrender.com
 ---
 
 ## 📋 Table of Contents
