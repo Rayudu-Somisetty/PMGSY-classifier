@@ -247,7 +247,46 @@ body {
 
 .prediction-box { background: var(--bg-secondary); border-left: 4px solid var(--success-color); border-radius: var(--radius-md); padding: var(--spacing-lg); width: 100%; text-align: left; }
 
-.prediction-label { margin-top: 8px; font-size: 1rem; }
+.prediction-label { margin-top: 10px; font-size: 1.05rem; }
+
+.prediction-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 10px 14px;
+  background: rgba(102, 126, 234, 0.12);
+  border: 1px solid rgba(102, 126, 234, 0.35);
+  border-radius: 999px;
+}
+
+.prediction-chip .chip-badge {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #667eea;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.prediction-chip .chip-value {
+  font-weight: 800;
+  color: #4f46e5;
+}
+
+.prediction-chip .chip-sub {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.prediction-output {
+  scroll-margin-top: 120px;
+}
+
 .prediction-raw { margin-top: 4px; }
 
 .prediction-title { font-size: 1rem; font-weight: 600; color: var(--text-primary); margin-bottom: var(--spacing-md); }

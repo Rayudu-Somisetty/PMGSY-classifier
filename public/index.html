@@ -166,9 +166,13 @@
               <div class="result-icon success-icon">✓</div>
               <h3 class="result-title">Classification Complete</h3>
 
-              <div class="prediction-box">
+                <div class="prediction-box">
                 <h4 class="prediction-title">Prediction</h4>
-                <div class="prediction-label">Predicted Scheme: <strong><span id="predictedLabelValue">—</span></strong></div>
+                <div class="prediction-chip" aria-live="polite">
+                  <span class="chip-badge">✓</span>
+                  <span class="chip-sub">Predicted Scheme</span>
+                  <span class="chip-value">&nbsp;<span id="predictedLabelValue">—</span></span>
+                </div>
                 <div class="prediction-raw">
                   <h5 class="prediction-title" style="margin-top:12px;">Raw Model Output:</h5>
                   <pre class="prediction-output" id="predictionOutput"></pre>
