@@ -1,19 +1,19 @@
 /**
  * PMGSY Project Classifier - Express Backend Server
- * Serves frontend UI and handles secure IBM Watson ML API calls
+ * Serves frontend UI and handles local ML predictions from the bundled dataset
  */
 
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const localModel = require('./localModel');
 
 // ============================================
 // Initialize Express App
 // ============================================
 const app = express();
 const PORT = process.env.PORT || 3000;
-const IBM_CLOUD_API_KEY = process.env.IBM_CLOUD_API_KEY;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 // ============================================
@@ -50,91 +50,16 @@ app.use((req, res, next) => {
 });
 
 
-// ============================================
-// IBM Watson ML Configuration
-// ============================================
-const IBM_AUTH_URL = process.env.IBM_AUTH_URL || 'https://iam.cloud.ibm.com/identity/token';
-const IBM_SCORING_URL = process.env.IBM_SCORING_URL || 'https://au-syd.ml.cloud.ibm.com/ml/v4/deployments/019e9206-04c4-7346-ab4a-90e04f7ef203/predictions?version=2021-05-01';
-
-
-// ============================================
-// Step 1: IBM Authentication
-// Retrieves access token using API key
-// ============================================
-async function getIBMAccessToken() {
-  if (!IBM_CLOUD_API_KEY) {
-    const msg = 'IBM_CLOUD_API_KEY is not configured on the server.';
-    console.error('[IBM Auth] ✗', msg);
-    throw new Error(msg);
+function extractPredictionPayload(body) {
+  if (!body) {
+    return null;
   }
-  try {
-    console.log('[IBM Auth] Requesting access token...');
-    
-    const response = await fetch(IBM_AUTH_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: `grant_type=urn:ibm:params:oauth:grant-type:apikey&apikey=${IBM_CLOUD_API_KEY}`,
-    });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`IBM Authentication failed: ${response.status} - ${errorText}`);
-    }
-
-    const data = await response.json();
-    console.log('[IBM Auth] ✓ Access token obtained successfully');
-    return data.access_token;
-  } catch (error) {
-    console.error('[IBM Auth] ✗ Error fetching access token:', error.message);
-    throw error;
+  if (body.input_data && Array.isArray(body.input_data) && body.input_data.length > 0) {
+    return body;
   }
-}
 
-// ============================================
-// Step 2: Send Prediction to IBM Watson ML
-// Uses the access token to make authenticated prediction request
-// ============================================
-async function sendPredictionToIBM(accessToken, payload) {
-  // Abort if IBM request hangs
-  const timeoutMs = Number(process.env.IBM_TIMEOUT_MS || 15000);
-
-  try {
-    console.log('[IBM Prediction] Sending prediction request to IBM Watson ML...');
-    console.log('[IBM Prediction] Payload:', JSON.stringify(payload, null, 2));
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-
-    let response;
-    try {
-      response = await fetch(IBM_SCORING_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify(payload),
-        signal: controller.signal,
-      });
-    } finally {
-      clearTimeout(timeoutId);
-    }
-
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`IBM Prediction failed: ${response.status} - ${errorText}`);
-    }
-
-    const data = await response.json();
-    console.log('[IBM Prediction] ✓ Prediction received successfully');
-    return data;
-  } catch (error) {
-    console.error('[IBM Prediction] ✗ Error sending prediction:', error.message);
-    throw error;
-  }
+  return body;
 }
 
 // ============================================
@@ -145,6 +70,7 @@ app.get('/api/health', (req, res) => {
     status: 'ok',
     service: 'PMGSY Project Classifier API',
     environment: NODE_ENV,
+    model: localModel.summary(),
     timestamp: new Date().toISOString(),
   });
 });
@@ -152,7 +78,7 @@ app.get('/api/health', (req, res) => {
 // ============================================
 // Main Prediction Endpoint
 // POST /api/predict
-// Handles: Form data → IBM Auth → ML Model → Results
+// Handles: Form data → local model → Results
 // ============================================
 app.post('/api/predict', async (req, res) => {
   const startTime = Date.now();
@@ -182,50 +108,30 @@ app.post('/api/predict', async (req, res) => {
       });
     }
 
-    // Validate expected 14-feature count if possible
-    if (first.fields.length !== 14 || first.values[0].length !== 14) {
+    // Validate expected feature count if possible
+    if (first.fields.length < 13 || first.values[0].length < 13) {
       return res.status(400).json({
         success: false,
         error: 'Invalid feature count.',
-        details: 'Model expects exactly 14 features (fields and values length must both be 14).',
+        details: 'Model expects the PMGSY feature payload with at least 13 core fields.',
       });
     }
 
     console.log('[VALIDATION] ✓ Request payload shape is valid');
 
-
     // ============================================
-    // Step 1: Authenticate with IBM
+    // Step 1: Run Local Prediction
     // ============================================
-    console.log('\n[STEP 1] Authenticating with IBM Cloud...');
-    const accessToken = await getIBMAccessToken();
-
-    // ============================================
-    // Step 2: Send Prediction Request
-    // ============================================
-    console.log('\n[STEP 2] Sending prediction to IBM Watson ML...');
-    const predictionResult = await sendPredictionToIBM(accessToken, req.body);
+    const predictionPayload = extractPredictionPayload(req.body);
+    console.log('\n[STEP 1] Running local model prediction...');
+    const predictionResult = localModel.predict(predictionPayload);
 
     // ============================================
     // Step 3: Return Result to Frontend
     // ============================================
     const elapsedTime = Date.now() - startTime;
 
-    // Try to extract a friendly predicted label (best-effort, backward compatible)
-    let predictedLabel = null;
-    try {
-      // Common IBM Watson format: { predictions: [{ fields: ["prediction"], values: [["PMGSY-I"]] }] }
-      const preds = predictionResult && (predictionResult.predictions || predictionResult);
-      const firstPred = Array.isArray(preds) ? preds[0] : (predictionResult.predictions && predictionResult.predictions[0]);
-      if (firstPred && Array.isArray(firstPred.values) && firstPred.values[0] && firstPred.values[0][0] != null) {
-        predictedLabel = String(firstPred.values[0][0]);
-      }
-      if (!predictedLabel && Array.isArray(preds) && preds[0]?.values?.[0]?.[0] != null) {
-        predictedLabel = String(preds[0].values[0][0]);
-      }
-    } catch (_) {
-      // ignore parsing issues
-    }
+    const predictedLabel = predictionResult.predictedLabel;
 
     const responsePayload = {
       success: true,
@@ -234,7 +140,9 @@ app.post('/api/predict', async (req, res) => {
       metadata: {
         timestamp: new Date().toISOString(),
         processingTimeMs: elapsedTime,
-        model: 'XGBoost Classifier (IBM Watson ML)',
+        model: predictionResult.modelName,
+        algorithm: predictionResult.algorithm,
+        trainingRows: predictionResult.trainingRows,
       },
     };
 
@@ -314,19 +222,18 @@ app.listen(PORT, () => {
   console.log(`   • Health Check: http://localhost:${PORT}/api/health`);
   console.log(`   • API Endpoint: POST http://localhost:${PORT}/api/predict\n`);
 
-  console.log('🔐 Configuration:');
-  console.log(`   • IBM API Key: ${IBM_CLOUD_API_KEY ? '✓ Configured' : '✗ NOT SET'}`);
-  console.log(`   • IBM Auth URL: ${IBM_AUTH_URL}`);
-  console.log(`   • IBM Model Deployment: au-syd region\n`);
+  const summary = localModel.summary();
+  console.log('🤖 Local Model:');
+  console.log(`   • Model: ${summary.modelName}`);
+  console.log(`   • Algorithm: ${summary.algorithm}`);
+  console.log(`   • Dataset: ${summary.datasetPath}`);
+  console.log(`   • Training rows: ${summary.trainingRows}`);
+  console.log(`   • Classes: ${summary.labels.join(', ')}`);
+  console.log(`   • Neighbors: ${summary.neighbors}\n`);
 
   console.log('📚 Available Endpoints:');
   console.log('   • GET  /api/health          - Server health check');
   console.log('   • POST /api/predict         - Make a prediction\n');
-
-  if (!IBM_CLOUD_API_KEY) {
-    console.warn('\n⚠️  WARNING: IBM_CLOUD_API_KEY is not configured!');
-    console.warn('   Please set IBM_CLOUD_API_KEY in your .env file\n');
-  }
 
   console.log('Press Ctrl+C to stop the server\n');
 });

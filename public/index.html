@@ -25,7 +25,7 @@
         </div>
       </div>
       <div class="header-info">
-        <p class="info-text">Powered by <strong>IBM Watson ML</strong> • XGBoost Classifier • Pradhan Mantri Gram Sadak Yojana</p>
+        <p class="info-text">Powered by a <strong>local ML model</strong> • weighted k-NN classifier • Pradhan Mantri Gram Sadak Yojana</p>
       </div>
     </header>
 
@@ -128,7 +128,7 @@
               <div class="form-row">
                 <div class="form-group full-width">
                   <label for="column15" class="form-label">Column 15 (Additional Parameter) <span class="required">*</span></label>
-                  <input type="text" id="column15" name="column15" class="form-input" placeholder="Additional classification parameter" required aria-label="Column 15">
+                  <input type="text" id="column15" name="column15" class="form-input" placeholder="Optional extra context" aria-label="Column 15 optional">
                 </div>
               </div>
             </fieldset>
@@ -153,11 +153,11 @@
           <div id="loadingState" class="result-state loading-state" style="display: none;">
             <div class="spinner"></div>
             <h3 class="loading-title">Processing Your Request</h3>
-            <p class="loading-description">Analyzing project parameters with AI model...</p>
+            <p class="loading-description">Analyzing project parameters with the bundled local model...</p>
             <div class="progress-steps">
-              <div class="step active">Authenticating with IBM Watson ML</div>
-              <div class="step">Sending data to classifier</div>
-              <div class="step">Receiving predictions</div>
+              <div class="step active">Preparing feature vector</div>
+              <div class="step">Running local similarity search</div>
+              <div class="step">Receiving prediction</div>
             </div>
           </div>
 
@@ -217,10 +217,10 @@
     <footer class="footer">
       <div class="footer-content">
         <p class="footer-main">🚀 PMGSY Project Classifier | Intelligent Classification of Rural Infrastructure Projects</p>
-        <p class="footer-secondary">Built with Node.js, Express.js, IBM Watson ML, and XGBoost</p>
+        <p class="footer-secondary">Built with Node.js, Express.js, and a local weighted k-NN model</p>
         <p class="footer-tech">
-          <span class="tech-badge">IBM Watson AI</span>
-          <span class="tech-badge">XGBoost</span>
+          <span class="tech-badge">Local ML</span>
+          <span class="tech-badge">k-NN</span>
           <span class="tech-badge">Express.js</span>
           <span class="tech-badge">HTML5</span>
         </p>

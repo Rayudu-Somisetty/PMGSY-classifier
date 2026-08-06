@@ -37,14 +37,14 @@ async function handleFormSubmit(event) {
   }
 
   const formData = new FormData(predictionForm);
-  const payload = formatPayloadForIBM(formData);
+  const payload = formatPayloadForModel(formData);
   appState.lastPayload = payload;
 
   showLoadingState();
   await sendPredictionRequest(payload);
 }
 
-function formatPayloadForIBM(formData) {
+function formatPayloadForModel(formData) {
   const fields = [
     'STATE_NAME',
     'DISTRICT_NAME',
@@ -80,7 +80,7 @@ function formatPayloadForIBM(formData) {
   };
 
   const values = [];
-  const numericIBMKeys = new Set([
+  const numericModelKeys = new Set([
     'NO_OF_ROAD_WORK_SANCTIONED',
     'LENGTH_OF_ROAD_WORK_SANCTIONED',
     'NO_OF_BRIDGES_SANCTIONED',
@@ -94,9 +94,9 @@ function formatPayloadForIBM(formData) {
     'NO_OF_BRIDGES_BALANCE',
   ]);
 
-  for (const [formKey, ibmKey] of Object.entries(fieldMapping)) {
+  for (const [formKey, modelKey] of Object.entries(fieldMapping)) {
     const value = formData.get(formKey);
-    if (numericIBMKeys.has(ibmKey)) values.push(parseFloat(value) || 0);
+    if (numericModelKeys.has(modelKey)) values.push(parseFloat(value) || 0);
     else values.push(String(value));
   }
 

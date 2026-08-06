@@ -1,7 +1,7 @@
 {
   "name": "pmgsy-project-classifier",
   "version": "1.0.0",
-  "description": "PMGSY (Pradhan Mantri Gram Sadak Yojana) Project Classifier - ML-Powered Infrastructure Classification using IBM Watson AI",
+  "description": "PMGSY (Pradhan Mantri Gram Sadak Yojana) Project Classifier - local ML-powered infrastructure classification",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -12,10 +12,13 @@
     "pmgsy",
     "rural-infrastructure",
     "machine-learning",
-    "xgboost",
-    "ibm-watson",
+    "knn",
+    "local-ml",
     "classification"
   ],
+  "engines": {
+    "node": ">=18"
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {
